@@ -1,7 +1,10 @@
 package com.huynhcanh.profileservice.controller;
 
+import com.google.gson.Gson;
+import com.huynhcanh.commonservice.utils.CommonFunction;
 import com.huynhcanh.profileservice.model.ProfileDTO;
 import com.huynhcanh.profileservice.service.ProfileService;
+import com.huynhcanh.profileservice.utils.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,8 @@ public class ProfileController {
     @Autowired
     ProfileService profileService;
 
+    Gson gson = new Gson();
+
     @GetMapping
     public ResponseEntity<Flux<ProfileDTO>> getAllProfile(){
         return ResponseEntity.ok(profileService.getAllProfile());
@@ -29,7 +34,9 @@ public class ProfileController {
     }
 
     @PostMapping
-    public ResponseEntity<Mono<ProfileDTO>> createNewProfile(@RequestBody ProfileDTO profileDTO){
-        return ResponseEntity.status(HttpStatus.CREATED).body(profileService.createNewProfile(profileDTO));
+    public ResponseEntity<Mono<ProfileDTO>> createNewProfile(@RequestBody String requestStr){
+        InputStream inputStream = ProfileController.class.getClassLoader().getResourceAsStream(Constant.JSON_REQ_CREATE_PROFILE);
+        CommonFunction.jsonValidate(inputStream,requestStr);
+        return ResponseEntity.status(HttpStatus.CREATED).body(profileService.createNewProfile(gson.fromJson(requestStr,ProfileDTO.class)));
     }
 }
